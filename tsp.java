@@ -2,7 +2,8 @@
 Author: Chris Del Fattore
 Email:	crdelf01@cardmail.louisville.edu
 Description:
-
+	First Verson can calculate up to 9 points quickly, 10 is too much.
+	Brute force is too inefficent for 10 points
 */
 import java.io.*;
 import java.util.*;
@@ -35,6 +36,7 @@ public class tsp {
 			pointsMap.put(p.getName(), p);
 		}
 
+
 		//Find the permutations of the set of points
 		String initString = "";
 		for(Point p : points){
@@ -42,32 +44,55 @@ public class tsp {
 		}
 		//System.out.println("Initial String " + initString);
 		permutation("",initString);
-		//System.out.println(listOfPermutations.size());
-		//bruteForceSearch(listOfPermutations, points);
-		//printPermutations();
+		System.out.println(listOfPermutations.size());
+		System.out.println("Finding Lengths");
+		Map<String, Double> pathLengths = clacAllPaths(pointsMap,listOfPermutations);
+		String finalPath = findSmallestPath(pathLengths);
+		System.out.println("The shortest path is: " + finalPath + " with a length of " + pathLengths.get(finalPath));
 		//System.out.println("Complete");
 
 	}
 
-	//find smallest path using brute force
-	/*public static void bruteForceSearch(List<String> perms, List<Point> points) {
-		HashMap<String, Double> pathLengths = new HashMap<String, Double>();
-		for (String s : perms){
-			double distance;
-			String[] temp = s.split("");
-			System.out.println(Arrays.toString(temp));
-			for(int i = 0;i<temp.length;i++){
-				//if(i < temp.length - 1){
-				distance += computeDistance(points.get(i), points.get(i+1));	
-				//}
-				/*else {
-					distance += computeDistance(points.get(i),points.get(0));
+	//find the smallest path using a simple min number algorithm
+	//embarrassing enought this is the most efficent algorithm at O(n) in the entire program
+	public static String findSmallestPath(Map<String, Double> paths){
+		String shortest = "";
+		for(String s : paths.keySet()){
+			//System.out.println("Path " + s + " has a length of " + paths.get(s));
+			if(shortest == "") {
+				shortest = s;
+			}
+			else if(paths.get(s) < paths.get(shortest)){
+				shortest = s;
+			}
+		}
+		return shortest;
+	}
+
+	//claculate all of the path lengths
+	//uses brute force, starts to have trouble after a length of 9 points
+	public static Map<String,Double> clacAllPaths(Map<Integer,Point> map, List<String> perm) {
+		Map<String,Double> pathLengths = new HashMap<String,Double>();
+		for(String s : perm) {
+			String[] tmpa = s.split("");
+			Double tempDis = 0.0;
+			for(int i = 0;i<s.length();i++){
+				if(i+1==s.length()){
+					//System.out.println(Integer.parseInt(tmpa[i]) + "," + Integer.parseInt(tmpa[0]));
+					//System.out.println(map.get(Integer.parseInt(tmpa[i])) + " " + map.get(Integer.parseInt(tmpa[0])));
+					tempDis += computeDistance(map.get(Integer.parseInt(tmpa[i])), map.get(Integer.parseInt(tmpa[0])));
+				} 
+				else{
+					//System.out.println(Integer.parseInt(tmpa[i]) + "," + Integer.parseInt(tmpa[i+1]));
+					//System.out.println(map.get(Integer.parseInt(tmpa[i])) + " " + map.get(Integer.parseInt(tmpa[i+1])));
+					tempDis += computeDistance(map.get(Integer.parseInt(tmpa[i])), map.get(Integer.parseInt(tmpa[i+1])));
 				}
 			}
-			distance += computeDistance(points.get(),points.get(0));
+			//System.out.println(s + " " + tempDis);
+			pathLengths.put(s,tempDis);
 		}
-		//return 
-	}*/
+		return pathLengths;
+	}
 
 	//Method to compute distance
 	public static double computeDistance(Point a, Point b){
@@ -88,7 +113,7 @@ public class tsp {
         }
 	}
 
-	//Simple Method to pring the permutations.
+	//Simple Method to print the permutations.
 	//Must run permutation method before printPermutations method
 	public static void printPermutations(){
 		for(String s : listOfPermutations) {
