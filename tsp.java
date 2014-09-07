@@ -43,7 +43,6 @@ public class tsp {
 
 			}
 		}
-		checkifDupe("adcb");
 		//Convert the numbers to letters on the point objects
 		//see line 98 comments for more info
 		//this function is located on line 107
