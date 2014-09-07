@@ -1,7 +1,7 @@
 /* Assignment: Project 1 - Brute Force Traveling Salesman Problem
-** Name: Chris Del Fattore 
+** Name: Chris Del Fattore crdelf01@cardmail.louisville.edu
 ** Description: Use brute force to find the minimum cost solution to a Traveling Salesperson Problem
-**
+** To run the program simply compile using javac and then run the program like this: java tsp [path\filename.tsp]
 */
 import java.io.*;
 import java.util.*;
@@ -11,7 +11,7 @@ public class tsp {
 	public static HashMap<String,Point> pointsMap; //A hashmap used to retrieve point information easier
 	public static Double shortPathLen = 0.0; //public variable used to keep track of the shoretest path length
 	public static String shortPath = ""; //public variable to keep track of the shortest path string
-	
+	public static Boolean firstPerm = true; //Needed for first permutation helps keep the number of permutations low
 	public static void main(String args[]) throws IOException{
 		
 		//Takes the filename as a parameter. File contains points and the x and y cooridnates.
@@ -43,7 +43,7 @@ public class tsp {
 
 			}
 		}
-
+		checkifDupe("adcb");
 		//Convert the numbers to letters on the point objects
 		//see line 98 comments for more info
 		//this function is located on line 107
@@ -144,30 +144,53 @@ public class tsp {
 	public static void permutation(String prefix, String str){
 		int n = str.length();
         if (n == 0) {
-        	String[] preArray = prefix.split("");
-        	//Prevents creating already generated paths
-        	//By only generating paths that start with a (which means 1)
-    		if(preArray[0].contains("a")) {
-        		Double len = clacPathDistance(pointsMap, prefix);
-        		//if the path is the first path calculated then it must be the shortest
-        		if(shortPathLen == 0.0){
-        			shortPathLen = len;
-        			shortPath = prefix;
-        		}
-        		//chekc if the newly calculated path is the shortest
-        		else if(len < shortPathLen){
+        	//Check if the path is a reverse order of another path
+        	if(checkifDupe(prefix)) {
+	    		Double len = clacPathDistance(pointsMap, prefix);
+	    		//if the path is the first path calculated then it must be the shortest
+	    		if(shortPathLen == 0.0){
+	    			shortPathLen = len;
+	    			shortPath = prefix;
+	    		}
+	    		//chekc if the newly calculated path is the shortest
+	    		else if(len < shortPathLen){
 	        		shortPathLen = len;
 	        		shortPath = prefix;
 	        		//System.out.println("Prefix added: " + prefix);
-        		}
-        	}
+	    		}
+	    	}
        	}
         else {
-            for (int i = 0; i < n; i++) {
-            	permutation(prefix + str.charAt(i), str.substring(0, i) + str.substring(i+1));
-            } 
-		}	    
+        	String[] preArray = prefix.split("");
+        	//Prevents creating already generated paths
+        	//By only generating paths that start with a (which means 1)
+        	if(preArray[0].contains("a") || firstPerm) {
+	            for (int i = 0; i < n; i++) {
+	            	firstPerm = false;
+	            	permutation(prefix + str.charAt(i), str.substring(0, i) + str.substring(i+1));
+	            } 
+			}	
+		}
     }
+
+    //To eliminate reverses we can require that the number at the second place must be smaller than the number at the last place.
+	//if the second number is greater than that last number, then this path is the reverse order
+	//of another path that we have already calculated a distance for.
+	public static Boolean checkifDupe(String path) {
+		String[] pathArray = path.split("");
+		return singleLetterToNum(pathArray[1]) < singleLetterToNum(pathArray[pathArray.length-1]) ? true : false;
+	}
+	//used to help with checkifDupe, converts a single letter to a number
+	public static int singleLetterToNum(String s) {
+		Map<String,Integer> mapLettoNums = new HashMap<String,Integer>();
+		String[] letters = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p"};
+		for(int i = 0;i<letters.length;i++){
+			mapLettoNums.put(letters[i],i+1);
+		}
+		return mapLettoNums.get(s);
+
+	}
+
 }
 
 //Object used to represent a single point
